@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Login — Sistem Prediksi Kelayakan Kredit{% endblock %}
+{% block content %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark large">XGB</div>
+      <h1>Sistem Prediksi Kelayakan Kredit</h1>
+      <p class="sub">FinTech Lending &middot; Algoritma XGBoost &middot; Berbasis Web</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn-primary">Masuk →</button>
+    </form>
+
+    <p class="login-hint">
+      Akun demo — Admin: <code>admin</code> / <code>admin123</code><br>
+      Analis: <code>analis1</code> / <code>analis123</code>
+    </p>
+  </div>
+</div>
+{% endblock %}

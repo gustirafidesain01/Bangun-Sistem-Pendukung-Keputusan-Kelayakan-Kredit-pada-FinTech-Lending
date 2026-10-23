@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Riwayat Pengajuan — Sistem Prediksi Kelayakan Kredit{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <h2>Riwayat Pengajuan</h2>
+  <p class="sub">Semua pengajuan yang pernah diproses sistem.</p>
+</div>
+
+<div class="export-row">
+  <a href="{{ url_for('export_excel') }}" class="btn-export">⬇ Export Excel</a>
+  <a href="{{ url_for('sampah') }}" class="btn-export">🗑 Tempat Sampah</a>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+  <form method="GET" action="{{ url_for('riwayat') }}" class="filter-form">
+    <input type="text" name="q" placeholder="Cari nama pemohon..." value="{{ keyword }}">
+    <select name="status">
+      <option value="">Semua Status</option>
+      <option value="Layak" {{ 'selected' if status_filter=='Layak' }}>Layak</option>
+      <option value="Berisiko Tinggi" {{ 'selected' if status_filter=='Berisiko Tinggi' }}>Berisiko Tinggi</option>
+      <option value="Dibatalkan" {{ 'selected' if status_filter=='Dibatalkan' }}>Dibatalkan</option>
+    </select>
+    {% if current_user.is_admin and daftar_analis %}
+    <select name="analis">
+      <option value="">Semua Analis</option>
+      {% for a in daftar_analis %}
+      <option value="{{ a.id }}" {{ 'selected' if analis_filter==a.id|string }}>{{ a.nama_lengkap }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+    <button type="submit" class="btn-primary" style="width:auto; padding:10px 20px;">Cari</button>
+  </form>
+</div>
+
+<div class="card">
+  {% if daftar_pengajuan %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Nama Pemohon</th><th>Skor</th><th>Rekomendasi</th><th>Keputusan</th><th>Diajukan Oleh</th><th>Tanggal</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+      {% for p in daftar_pengajuan %}
+      <tr>
+        <td style="font-family:Inter; cursor:pointer;" onclick="window.location='{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}'">{{ p.nama_pemohon }}</td>
+        <td style="cursor:pointer;" onclick="window.location='{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}'">{{ p.skor_kredit }}</td>
+        <td style="cursor:pointer;" onclick="window.location='{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}'">
+          {% if p.is_dibatalkan %}
+          <span class="pill warn">Dibatalkan</span>
+          {% else %}
+          <span class="pill {{ 'ok' if p.rekomendasi_sistem=='Layak' else 'risk' }}">{{ p.rekomendasi_sistem }}</span>
+          {% endif %}
+        </td>
+        <td style="cursor:pointer;" onclick="window.location='{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}'">{{ p.keputusan_analis }}</td>
+        <td style="font-family:Inter; cursor:pointer;" onclick="window.location='{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}'">{{ p.dibuat_oleh_user.nama_lengkap }}</td>
+        <td style="cursor:pointer;" onclick="window.location='{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}'">{{ p.dibuat_pada.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>
+          {% if current_user.is_admin or p.dibuat_oleh == current_user.id %}
+          <div class="action-dropdown">
+            <button class="action-dropdown-btn" type="button">Aksi ▾</button>
+            <div class="action-dropdown-menu">
+              <a href="{{ url_for('edit_pengajuan', pengajuan_id=p.id) }}">Edit</a>
+              <a href="{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}">Lihat Detail</a>
+              <form method="POST" action="{{ url_for('hapus_pengajuan', pengajuan_id=p.id) }}" class="inline-form"
+                    onsubmit="return confirm('Pindahkan ke Tempat Sampah?');">
+                <button type="submit" class="danger">Hapus</button>
+              </form>
+            </div>
+          </div>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-state">Tidak ada pengajuan yang cocok dengan pencarian.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

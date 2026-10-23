@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }} — Sistem Prediksi Kelayakan Kredit{% endblock %}
+{% block content %}
+
+<div class="error-wrap">
+  <p class="error-code">{{ code }}</p>
+  <p class="error-msg">{{ pesan }}</p>
+  {% if current_user.is_authenticated %}
+  <a href="{{ url_for('dashboard') }}" class="btn-primary" style="width:auto; padding:12px 24px; text-decoration:none;">← Kembali ke Dashboard</a>
+  {% else %}
+  <a href="{{ url_for('login') }}" class="btn-primary" style="width:auto; padding:12px 24px; text-decoration:none;">← Ke Halaman Login</a>
+  {% endif %}
+</div>
+
+{% endblock %}

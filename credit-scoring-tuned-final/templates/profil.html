@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Profil Saya — Sistem Prediksi Kelayakan Kredit{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <h2>Profil Saya</h2>
+  <p class="sub">Kelola data akun dan password Anda.</p>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <h2>Data Akun</h2>
+    <p class="sub">Username: <b>{{ current_user.username }}</b> &middot; Role: {{ 'Admin' if current_user.is_admin else 'Analis Kredit' }}</p>
+    <form method="POST" action="{{ url_for('profil') }}">
+      <input type="hidden" name="aksi" value="update_nama">
+      <div class="field">
+        <label for="nama_lengkap">Nama Lengkap</label>
+        <input type="text" id="nama_lengkap" name="nama_lengkap" value="{{ current_user.nama_lengkap }}" required>
+      </div>
+      <button type="submit" class="btn-primary">Simpan Nama</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Ganti Password</h2>
+    <p class="sub">Password minimal 6 karakter.</p>
+    <form method="POST" action="{{ url_for('profil') }}">
+      <input type="hidden" name="aksi" value="ganti_password">
+      <div class="field">
+        <label for="password_lama">Password Lama</label>
+        <input type="password" id="password_lama" name="password_lama" required>
+      </div>
+      <div class="field">
+        <label for="password_baru">Password Baru</label>
+        <input type="password" id="password_baru" name="password_baru" required minlength="6">
+      </div>
+      <div class="field">
+        <label for="konfirmasi_password">Konfirmasi Password Baru</label>
+        <input type="password" id="konfirmasi_password" name="konfirmasi_password" required minlength="6">
+      </div>
+      <button type="submit" class="btn-primary">Ganti Password</button>
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

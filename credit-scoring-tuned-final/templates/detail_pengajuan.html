@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Detail Pengajuan — {{ p.nama_pemohon }}{% endblock %}
+{% block content %}
+
+<div class="page-head" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h2>Detail Pengajuan: {{ p.nama_pemohon }}
+      {% if p.is_dibatalkan %}<span class="pill warn">Dibatalkan</span>{% endif %}
+    </h2>
+    <p class="sub">Diajukan oleh {{ p.dibuat_oleh_user.nama_lengkap }} pada {{ p.dibuat_pada.strftime('%d/%m/%Y %H:%M') }}
+      {% if p.diubah_pada %} &middot; Diedit terakhir {{ p.diubah_pada.strftime('%d/%m/%Y %H:%M') }}{% endif %}
+    </p>
+  </div>
+
+  {% if bisa_kelola %}
+  <div class="action-dropdown">
+    <button class="action-dropdown-btn" type="button">Aksi ▾</button>
+    <div class="action-dropdown-menu">
+      <a href="{{ url_for('edit_pengajuan', pengajuan_id=p.id) }}">Edit Data</a>
+      <form method="POST" action="{{ url_for('batalkan_pengajuan', pengajuan_id=p.id) }}" class="inline-form"
+            onsubmit="{{ 'return confirm(\'Batalkan pengajuan ini?\');' if not p.is_dibatalkan else '' }}">
+        {% if not p.is_dibatalkan %}
+        <input type="hidden" name="catatan_pembatalan" value="Ditandai tidak valid oleh {{ current_user.nama_lengkap }}">
+        {% endif %}
+        <button type="submit" class="warn">{{ 'Aktifkan Kembali' if p.is_dibatalkan else 'Batalkan (data tidak valid)' }}</button>
+      </form>
+      <form method="POST" action="{{ url_for('hapus_pengajuan', pengajuan_id=p.id) }}" class="inline-form"
+            onsubmit="return confirm('Pindahkan ke Tempat Sampah? Bisa dipulihkan dalam 30 hari.');">
+        <button type="submit" class="danger">Hapus</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if p.is_dibatalkan %}
+<div class="trash-note">
+  <b>Pengajuan ini ditandai dibatalkan</b> (data dianggap tidak valid) — {{ p.catatan_pembatalan or 'Tanpa catatan.' }}
+</div>
+{% endif %}
+
+<div class="grid">
+
+  <div class="card">
+    <h2>Data Pemohon</h2>
+    <table class="data-table">
+      <tbody>
+        <tr><td style="font-family:Inter;">Usia</td><td>{{ p.person_age }} tahun</td></tr>
+        <tr><td style="font-family:Inter;">Pendapatan Tahunan</td><td>Rp {{ "{:,.0f}".format(p.person_income) }}</td></tr>
+        <tr><td style="font-family:Inter;">Status Rumah</td><td>{{ home_label }}</td></tr>
+        <tr><td style="font-family:Inter;">Lama Bekerja</td><td>{{ p.person_emp_length }} tahun</td></tr>
+        <tr><td style="font-family:Inter;">Tujuan Pinjaman</td><td>{{ intent_label }}</td></tr>
+        <tr><td style="font-family:Inter;">Jumlah Pinjaman</td><td>Rp {{ "{:,.0f}".format(p.loan_amnt) }}</td></tr>
+        <tr><td style="font-family:Inter;">Suku Bunga</td><td>{{ p.loan_int_rate }}%</td></tr>
+        <tr><td style="font-family:Inter;">Rasio Pinjaman/Pendapatan</td><td>{{ (p.loan_percent_income * 100) | round(1) }}%</td></tr>
+        <tr><td style="font-family:Inter;">Riwayat Gagal Bayar</td><td>{{ 'Ya' if p.cb_person_default_on_file=='Y' else 'Tidak' }}</td></tr>
+        <tr><td style="font-family:Inter;">Lama Riwayat Kredit</td><td>{{ p.cb_person_cred_hist_length }} tahun</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card result-card">
+    <h2>Hasil Prediksi Model</h2>
+    <div class="gauge-wrap">
+      <div class="gauge">
+        <svg viewBox="0 0 190 190">
+          <circle cx="95" cy="95" r="82" fill="none" stroke="#e7e9e4" stroke-width="10"/>
+          <circle cx="95" cy="95" r="82" fill="none"
+            stroke="{{ '#B23A2E' if p.rekomendasi_sistem=='Berisiko Tinggi' else '#C9A227' }}"
+            stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="515"
+            stroke-dashoffset="{{ 515 * (1 - p.skor_kredit/850) }}"
+            transform="rotate(-90 95 95)"/>
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-score">{{ p.skor_kredit }}</div>
+          <div class="gauge-label">Skor Kredit</div>
+        </div>
+      </div>
+      <div class="status-pill {{ 'risk' if p.rekomendasi_sistem=='Berisiko Tinggi' else 'ok' }}">
+        {{ p.rekomendasi_sistem }} — {{ (p.probabilitas_default * 100) | round(1) }}% prob. default
+      </div>
+    </div>
+
+    <div class="factors">
+      <h3>Faktor Risiko Terdeteksi</h3>
+      {% if faktor_risiko %}
+        {% for f in faktor_risiko %}
+        <div class="factor-row">
+          <span class="factor-name">{{ f.feature }}</span>
+          <div class="factor-track"><div class="factor-bar" style="width:{{ (f.weight*100) | round(0) }}%"></div></div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:#5b6577; font-size:13px;">Tidak ada faktor risiko signifikan terdeteksi.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<div class="card" style="margin-top:20px; max-width:720px;">
+  <h2>Keputusan Analis</h2>
+  <p class="sub">Status saat ini:
+    <span class="pill {{ 'ok' if p.keputusan_analis=='Disetujui' else ('risk' if p.keputusan_analis=='Ditolak' else '') }}">
+      {{ p.keputusan_analis }}
+    </span>
+  </p>
+
+  <form method="POST" action="{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}">
+    <div class="field">
+      <label for="keputusan">Keputusan Akhir</label>
+      <select id="keputusan" name="keputusan">
+        <option value="Menunggu" {{ 'selected' if p.keputusan_analis=='Menunggu' }}>Menunggu Peninjauan</option>
+        <option value="Disetujui" {{ 'selected' if p.keputusan_analis=='Disetujui' }}>Setujui Pinjaman</option>
+        <option value="Ditolak" {{ 'selected' if p.keputusan_analis=='Ditolak' }}>Tolak Pinjaman</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="catatan">Catatan (opsional)</label>
+      <input type="text" id="catatan" name="catatan" value="{{ p.catatan_analis or '' }}" placeholder="Alasan atau catatan tambahan...">
+    </div>
+    <button type="submit" class="btn-primary">Simpan Keputusan</button>
+  </form>
+</div>
+
+<p style="margin-top:16px;"><a href="{{ url_for('riwayat') }}">← Kembali ke Riwayat Pengajuan</a></p>
+
+{% endblock %}

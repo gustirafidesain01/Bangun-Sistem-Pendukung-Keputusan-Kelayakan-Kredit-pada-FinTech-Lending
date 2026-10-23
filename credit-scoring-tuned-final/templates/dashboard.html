@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Sistem Prediksi Kelayakan Kredit{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <h2>Dashboard</h2>
+  <p class="sub">Ringkasan aktivitas prediksi kelayakan kredit.</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <span class="stat-label">Pengajuan Hari Ini</span>
+    <span class="stat-value">{{ total_hari_ini }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Pengajuan Bulan Ini</span>
+    <span class="stat-value">{{ total_bulan_ini }}</span>
+  </div>
+  <div class="stat-card ok">
+    <span class="stat-label">Total Direkomendasikan Layak</span>
+    <span class="stat-value">{{ total_layak }}</span>
+  </div>
+  <div class="stat-card risk">
+    <span class="stat-label">Total Berisiko Tinggi</span>
+    <span class="stat-value">{{ total_berisiko }}</span>
+  </div>
+</div>
+
+<div class="grid" style="margin-top:20px;">
+  <div class="card">
+    <h2>Proporsi Layak vs Berisiko</h2>
+    <canvas id="pie-chart" height="200"></canvas>
+  </div>
+  {% if current_user.is_admin and grafik_per_analis %}
+  <div class="card">
+    <h2>Pengajuan per Analis</h2>
+    <canvas id="analis-chart" height="200"></canvas>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <h2>Pengajuan Terbaru</h2>
+  <p class="sub">5 pengajuan terakhir yang diproses sistem.</p>
+
+  {% if pengajuan_terbaru %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Nama Pemohon</th><th>Skor</th><th>Rekomendasi</th><th>Keputusan</th><th>Tanggal</th></tr>
+    </thead>
+    <tbody>
+      {% for p in pengajuan_terbaru %}
+      <tr onclick="window.location='{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}'" style="cursor:pointer;">
+        <td style="font-family:Inter;">{{ p.nama_pemohon }}</td>
+        <td>{{ p.skor_kredit }}</td>
+        <td><span class="pill {{ 'ok' if p.rekomendasi_sistem=='Layak' else 'risk' }}">{{ p.rekomendasi_sistem }}</span></td>
+        <td>{{ p.keputusan_analis }}</td>
+        <td>{{ p.dibuat_pada.strftime('%d/%m/%Y %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-state">Belum ada pengajuan. <a href="{{ url_for('prediksi') }}">Buat prediksi baru →</a></p>
+  {% endif %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+  new Chart(document.getElementById('pie-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Layak', 'Berisiko Tinggi'],
+      datasets: [{
+        data: [{{ total_layak }}, {{ total_berisiko }}],
+        backgroundColor: ['#C9A227', '#B23A2E'],
+      }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } } }
+  });
+
+  {% if current_user.is_admin and grafik_per_analis %}
+  const dataAnalis = {{ grafik_per_analis | tojson }};
+  new Chart(document.getElementById('analis-chart'), {
+    type: 'bar',
+    data: {
+      labels: dataAnalis.map(d => d.nama),
+      datasets: [{ label: 'Jumlah Pengajuan', data: dataAnalis.map(d => d.jumlah), backgroundColor: '#1C2B4A', borderRadius: 3 }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+  });
+  {% endif %}
+</script>
+
+{% endblock %}

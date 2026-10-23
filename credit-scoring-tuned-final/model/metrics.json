@@ -1,0 +1,214 @@
+{
+  "results": [
+    {
+      "model": "XGBoost (Sebelum Tuning)",
+      "accuracy": 0.92,
+      "precision": 0.8997,
+      "recall": 0.7131,
+      "f1_score": 0.7956,
+      "roc_auc": 0.9349,
+      "confusion_matrix": [
+        [
+          4980,
+          113
+        ],
+        [
+          408,
+          1014
+        ]
+      ]
+    },
+    {
+      "model": "XGBoost",
+      "accuracy": 0.9245,
+      "precision": 0.8947,
+      "recall": 0.7412,
+      "f1_score": 0.8108,
+      "roc_auc": 0.9428,
+      "confusion_matrix": [
+        [
+          4969,
+          124
+        ],
+        [
+          368,
+          1054
+        ]
+      ]
+    },
+    {
+      "model": "Random Forest",
+      "accuracy": 0.8748,
+      "precision": 0.7042,
+      "recall": 0.7349,
+      "f1_score": 0.7192,
+      "roc_auc": 0.9031,
+      "confusion_matrix": [
+        [
+          4654,
+          439
+        ],
+        [
+          377,
+          1045
+        ]
+      ]
+    },
+    {
+      "model": "Logistic Regression",
+      "accuracy": 0.7734,
+      "precision": 0.4879,
+      "recall": 0.7679,
+      "f1_score": 0.5967,
+      "roc_auc": 0.8465,
+      "confusion_matrix": [
+        [
+          3947,
+          1146
+        ],
+        [
+          330,
+          1092
+        ]
+      ]
+    }
+  ],
+  "feature_importance": [
+    {
+      "feature": "person_home_ownership",
+      "label": "Status Kepemilikan Rumah",
+      "importance": 0.2822
+    },
+    {
+      "feature": "loan_percent_income",
+      "label": "Rasio Pinjaman terhadap Pendapatan",
+      "importance": 0.1579
+    },
+    {
+      "feature": "person_emp_length",
+      "label": "Lama Masa Kerja (tahun)",
+      "importance": 0.1351
+    },
+    {
+      "feature": "cb_person_default_on_file",
+      "label": "Riwayat Gagal Bayar Sebelumnya",
+      "importance": 0.1111
+    },
+    {
+      "feature": "loan_int_rate",
+      "label": "Suku Bunga Pinjaman (%)",
+      "importance": 0.0987
+    },
+    {
+      "feature": "person_income",
+      "label": "Pendapatan Tahunan",
+      "importance": 0.0705
+    },
+    {
+      "feature": "loan_intent",
+      "label": "Tujuan Pinjaman",
+      "importance": 0.0692
+    },
+    {
+      "feature": "loan_amnt",
+      "label": "Jumlah Pinjaman Diajukan",
+      "importance": 0.0322
+    },
+    {
+      "feature": "person_age",
+      "label": "Usia Pemohon",
+      "importance": 0.0218
+    },
+    {
+      "feature": "cb_person_cred_hist_length",
+      "label": "Lama Riwayat Kredit (tahun)",
+      "importance": 0.0212
+    }
+  ],
+  "feature_columns": [
+    "person_age",
+    "person_income",
+    "person_emp_length",
+    "loan_amnt",
+    "loan_int_rate",
+    "loan_percent_income",
+    "cb_person_cred_hist_length",
+    "person_home_ownership",
+    "loan_intent",
+    "cb_person_default_on_file"
+  ],
+  "categorical_columns": [
+    "person_home_ownership",
+    "loan_intent",
+    "cb_person_default_on_file"
+  ],
+  "numeric_columns": [
+    "person_age",
+    "person_income",
+    "person_emp_length",
+    "loan_amnt",
+    "loan_int_rate",
+    "loan_percent_income",
+    "cb_person_cred_hist_length"
+  ],
+  "n_train": 40746,
+  "n_test": 6515,
+  "n_train_original": 26059,
+  "target_distribution_original": {
+    "0": 0.782,
+    "1": 0.218
+  },
+  "dataset_source": "Kaggle - Credit Risk Dataset (laotse)",
+  "dataset_rows_used": 32574,
+  "pipeline_notes": "loan_grade dikeluarkan dari fitur (ablation study menunjukkan penurunan performa minimal dan berpotensi sirkular secara konseptual). Preprocessing: split sebelum imputasi (mencegah leakage), SMOTENC (menjaga validitas kategori saat oversampling), encoding berbeda per model (Label untuk XGBoost/RF, One-Hot untuk Logistic Regression).",
+  "hyperparameter_tuning": {
+    "method": "RandomizedSearchCV (n_iter=30, cv=5, scoring=f1)",
+    "note": "SMOTENC dijalankan di dalam setiap fold cross-validation (bukan sekali di awal) untuk mencegah data sintetis bocor antar fold latih/validasi.",
+    "best_params": {
+      "subsample": 0.9,
+      "n_estimators": 400,
+      "min_child_weight": 1,
+      "max_depth": 7,
+      "learning_rate": 0.15,
+      "colsample_bytree": 0.9
+    },
+    "best_cv_f1_score": 0.7977,
+    "search_time_seconds": 80.4,
+    "before_tuning": {
+      "model": "XGBoost (Sebelum Tuning)",
+      "accuracy": 0.92,
+      "precision": 0.8997,
+      "recall": 0.7131,
+      "f1_score": 0.7956,
+      "roc_auc": 0.9349,
+      "confusion_matrix": [
+        [
+          4980,
+          113
+        ],
+        [
+          408,
+          1014
+        ]
+      ]
+    },
+    "after_tuning": {
+      "model": "XGBoost",
+      "accuracy": 0.9245,
+      "precision": 0.8947,
+      "recall": 0.7412,
+      "f1_score": 0.8108,
+      "roc_auc": 0.9428,
+      "confusion_matrix": [
+        [
+          4969,
+          124
+        ],
+        [
+          368,
+          1054
+        ]
+      ]
+    }
+  }
+}

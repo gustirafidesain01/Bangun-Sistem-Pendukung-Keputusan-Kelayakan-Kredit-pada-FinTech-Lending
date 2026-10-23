@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Edit User — {{ u.nama_lengkap }}{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <h2>Edit User: {{ u.nama_lengkap }}</h2>
+  <p class="sub">Ubah data akun. Untuk reset password, gunakan tombol "Reset Password" di halaman Kelola User.</p>
+</div>
+
+<div class="card" style="max-width:480px;">
+  <form method="POST" action="{{ url_for('edit_user', user_id=u.id) }}">
+    <div class="field">
+      <label for="nama_lengkap">Nama Lengkap</label>
+      <input type="text" id="nama_lengkap" name="nama_lengkap" value="{{ u.nama_lengkap }}" required>
+    </div>
+    <div class="field">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" value="{{ u.username }}" required>
+    </div>
+    <div class="field">
+      <label for="role">Role</label>
+      <select id="role" name="role">
+        <option value="analis" {{ 'selected' if u.role=='analis' }}>Analis Kredit</option>
+        <option value="admin" {{ 'selected' if u.role=='admin' }}>Admin</option>
+      </select>
+    </div>
+    <button type="submit" class="btn-primary">Simpan Perubahan</button>
+  </form>
+</div>
+
+<p style="margin-top:16px;"><a href="{{ url_for('kelola_user') }}">← Kembali ke Kelola User</a></p>
+
+{% endblock %}

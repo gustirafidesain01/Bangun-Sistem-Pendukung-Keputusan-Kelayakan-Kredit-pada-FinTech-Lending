@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Kelola User — Sistem Prediksi Kelayakan Kredit{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <h2>Kelola User</h2>
+  <p class="sub">Tambah atau nonaktifkan akun analis kredit &amp; admin.</p>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <h2>Daftar User</h2>
+    <table class="data-table">
+      <thead><tr><th>Nama</th><th>Username</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody>
+        {% for u in daftar_user %}
+        <tr>
+          <td style="font-family:Inter;">{{ u.nama_lengkap }}</td>
+          <td>{{ u.username }}</td>
+          <td style="font-family:Inter;">{{ 'Admin' if u.is_admin else 'Analis Kredit' }}</td>
+          <td><span class="pill {{ 'ok' if u.aktif else 'risk' }}">{{ 'Aktif' if u.aktif else 'Nonaktif' }}</span></td>
+          <td>
+            {% if u.id != current_user.id %}
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <a href="{{ url_for('edit_user', user_id=u.id) }}" class="btn-small" style="text-decoration:none; display:inline-block;">Edit</a>
+              <form method="POST" action="{{ url_for('reset_password', user_id=u.id) }}" class="inline-form"
+                    onsubmit="return confirm('Reset password {{ u.username }}? Password baru akan digenerate otomatis.');">
+                <button type="submit" class="btn-small">Reset Password</button>
+              </form>
+              <form method="POST" action="{{ url_for('toggle_user', user_id=u.id) }}" class="inline-form">
+                <button type="submit" class="btn-small">{{ 'Nonaktifkan' if u.aktif else 'Aktifkan' }}</button>
+              </form>
+            </div>
+            {% else %}
+            <span style="color:#5b6577; font-size:12px;">Akun Anda</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Tambah User Baru</h2>
+    <form method="POST" action="{{ url_for('tambah_user') }}">
+      <div class="field">
+        <label for="nama_lengkap">Nama Lengkap</label>
+        <input type="text" id="nama_lengkap" name="nama_lengkap" required>
+      </div>
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div class="field">
+        <label for="role">Role</label>
+        <select id="role" name="role">
+          <option value="analis">Analis Kredit</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">Tambah User</button>
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

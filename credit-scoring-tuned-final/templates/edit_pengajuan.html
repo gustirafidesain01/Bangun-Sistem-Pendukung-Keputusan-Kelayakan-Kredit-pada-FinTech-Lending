@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Edit Pengajuan — {{ p.nama_pemohon }}{% endblock %}
+{% block content %}
+
+{% set d = form_data if form_data else p %}
+
+<div class="page-head">
+  <h2>Edit Pengajuan: {{ p.nama_pemohon }}</h2>
+  <p class="sub">Perbaiki data yang salah input. Prediksi akan dihitung ulang otomatis setelah disimpan.</p>
+</div>
+
+<div class="card" style="max-width:720px;">
+  <form method="POST" action="{{ url_for('edit_pengajuan', pengajuan_id=p.id) }}">
+
+    <div class="field">
+      <label for="nama_pemohon">Nama Pemohon</label>
+      <input type="text" id="nama_pemohon" name="nama_pemohon" required value="{{ d.nama_pemohon if form_data is none else form_data.get('nama_pemohon','') }}">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="person_age">Usia (tahun)</label>
+        <input type="number" id="person_age" name="person_age" min="18" max="100" required value="{{ p.person_age if form_data is none else form_data.get('person_age','') }}">
+      </div>
+      <div class="field">
+        <label for="person_income">Pendapatan Tahunan (Rp)</label>
+        <input type="number" id="person_income" name="person_income" min="0" step="100000" required value="{{ p.person_income if form_data is none else form_data.get('person_income','') }}">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="person_home_ownership">Status Kepemilikan Rumah</label>
+        <select id="person_home_ownership" name="person_home_ownership">
+          {% for val, label in [('RENT','Sewa'),('OWN','Milik Sendiri'),('MORTGAGE','Kredit/Cicilan (KPR)'),('OTHER','Lainnya')] %}
+          <option value="{{ val }}" {{ 'selected' if p.person_home_ownership==val }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="person_emp_length">Lama Bekerja (tahun)</label>
+        <input type="number" id="person_emp_length" name="person_emp_length" step="0.1" min="0" max="60" required value="{{ p.person_emp_length if form_data is none else form_data.get('person_emp_length','') }}">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="loan_intent">Tujuan Pinjaman</label>
+      <select id="loan_intent" name="loan_intent">
+        {% for val, label in [('PERSONAL','Personal'),('EDUCATION','Pendidikan'),('MEDICAL','Medis'),('VENTURE','Modal Usaha'),('HOMEIMPROVEMENT','Renovasi Rumah'),('DEBTCONSOLIDATION','Konsolidasi Utang')] %}
+        <option value="{{ val }}" {{ 'selected' if p.loan_intent==val }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="loan_amnt">Jumlah Pinjaman Diajukan (Rp)</label>
+        <input type="number" id="loan_amnt" name="loan_amnt" min="0" step="100000" required value="{{ p.loan_amnt if form_data is none else form_data.get('loan_amnt','') }}">
+      </div>
+      <div class="field">
+        <label for="loan_int_rate">Suku Bunga Pinjaman (%)</label>
+        <input type="number" id="loan_int_rate" name="loan_int_rate" min="0" max="40" step="0.1" required value="{{ p.loan_int_rate if form_data is none else form_data.get('loan_int_rate','') }}">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="cb_person_default_on_file">Riwayat Gagal Bayar</label>
+        <select id="cb_person_default_on_file" name="cb_person_default_on_file">
+          <option value="N" {{ 'selected' if p.cb_person_default_on_file=='N' }}>Tidak Ada</option>
+          <option value="Y" {{ 'selected' if p.cb_person_default_on_file=='Y' }}>Pernah Gagal Bayar</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cb_person_cred_hist_length">Lama Riwayat Kredit (tahun)</label>
+        <input type="number" id="cb_person_cred_hist_length" name="cb_person_cred_hist_length" min="0" max="40" required value="{{ p.cb_person_cred_hist_length if form_data is none else form_data.get('cb_person_cred_hist_length','') }}">
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary">Simpan &amp; Hitung Ulang Prediksi →</button>
+  </form>
+</div>
+
+<p style="margin-top:16px;"><a href="{{ url_for('detail_pengajuan', pengajuan_id=p.id) }}">← Batal, kembali ke detail</a></p>
+
+{% endblock %}

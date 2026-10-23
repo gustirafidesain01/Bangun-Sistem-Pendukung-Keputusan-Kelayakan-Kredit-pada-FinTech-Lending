@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Laporan & Evaluasi Model{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <h2>Laporan &amp; Evaluasi Model</h2>
+  <p class="sub">Statistik pengajuan dan performa model XGBoost dibanding algoritma pembanding.</p>
+</div>
+
+<div class="export-row">
+  <a href="{{ url_for('export_pdf') }}" class="btn-export">⬇ Export Laporan PDF</a>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card"><span class="stat-label">Total Pengajuan</span><span class="stat-value">{{ total_pengajuan }}</span></div>
+  <div class="stat-card ok"><span class="stat-label">Disetujui Analis</span><span class="stat-value">{{ total_disetujui }}</span></div>
+  <div class="stat-card risk"><span class="stat-label">Ditolak Analis</span><span class="stat-value">{{ total_ditolak }}</span></div>
+  <div class="stat-card"><span class="stat-label">Menunggu Peninjauan</span><span class="stat-value">{{ total_menunggu }}</span></div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <h2>Tren Pengajuan (7 Hari Terakhir)</h2>
+  <canvas id="trend-chart" height="80"></canvas>
+</div>
+
+<div class="metrics-grid" style="margin-top:20px;">
+  {% for r in metrics.results %}
+  <div class="metric-card {{ 'highlight' if r.model=='XGBoost' }}">
+    <div class="m-name">{{ r.model }} {% if r.model=='XGBoost' %}<span class="tag-primary">Model Utama</span>{% endif %}</div>
+    <div class="m-row"><span>Akurasi</span><span>{{ (r.accuracy*100) | round(2) }}%</span></div>
+    <div class="m-row"><span>Presisi</span><span>{{ (r.precision*100) | round(2) }}%</span></div>
+    <div class="m-row"><span>Recall</span><span>{{ (r.recall*100) | round(2) }}%</span></div>
+    <div class="m-row"><span>F1-Score</span><span>{{ (r.f1_score*100) | round(2) }}%</span></div>
+    <div class="m-row"><span>ROC-AUC</span><span>{{ r.roc_auc | round(3) }}</span></div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <h2>Faktor yang Memengaruhi Keputusan Kredit</h2>
+  <p class="sub">Feature importance dari model XGBoost, dilatih pada {{ metrics.dataset_rows_used }} baris data dari {{ metrics.dataset_source }}.</p>
+  <table class="data-table">
+    <thead><tr><th>Atribut</th><th>Tingkat Pengaruh</th></tr></thead>
+    <tbody>
+      {% for fi in metrics.feature_importance %}
+      <tr><td style="font-family:Inter;">{{ fi.label }}</td><td>{{ (fi.importance*100) | round(1) }}%</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+  const trendData = {{ tren | tojson }};
+  new Chart(document.getElementById('trend-chart'), {
+    type: 'line',
+    data: {
+      labels: trendData.map(t => t.tanggal),
+      datasets: [{
+        label: 'Jumlah Pengajuan',
+        data: trendData.map(t => t.jumlah),
+        borderColor: '#C9A227',
+        backgroundColor: 'rgba(201,162,39,0.15)',
+        fill: true,
+        tension: 0.3,
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+</script>
+
+{% endblock %}

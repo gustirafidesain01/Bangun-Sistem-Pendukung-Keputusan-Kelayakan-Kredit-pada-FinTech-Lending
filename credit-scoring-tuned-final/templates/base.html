@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Sistem Prediksi Kelayakan Kredit{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{% macro side_icon(name) %}{% if name == 'dashboard' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>{% elif name == 'predict' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>{% elif name == 'history' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>{% elif name == 'trash' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>{% elif name == 'report' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>{% elif name == 'users' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>{% elif name == 'log' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>{% endif %}{% endmacro %}
+
+{% if current_user.is_authenticated %}
+<div class="app-shell">
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="brand-mark">XGB</div>
+      <div class="brand-text sidebar-label">
+        <p class="eyebrow">Sistem Pendukung Keputusan</p>
+        <h1>Prediksi Kelayakan Kredit</h1>
+      </div>
+    </div>
+
+    <nav class="side-nav">
+      <p class="side-nav-heading sidebar-label">Menu</p>
+      <a href="{{ url_for('dashboard') }}" class="side-link {{ 'active' if request.endpoint=='dashboard' }}" title="Dashboard">
+        <span class="side-icon">{{ side_icon('dashboard') }}</span>
+        <span class="side-text sidebar-label">Dashboard</span>
+      </a>
+      <a href="{{ url_for('prediksi') }}" class="side-link {{ 'active' if request.endpoint=='prediksi' }}" title="Prediksi Baru">
+        <span class="side-icon">{{ side_icon('predict') }}</span>
+        <span class="side-text sidebar-label">Prediksi Baru</span>
+      </a>
+      <a href="{{ url_for('riwayat') }}" class="side-link {{ 'active' if request.endpoint=='riwayat' }}" title="Riwayat Pengajuan">
+        <span class="side-icon">{{ side_icon('history') }}</span>
+        <span class="side-text sidebar-label">Riwayat Pengajuan</span>
+      </a>
+      <a href="{{ url_for('sampah') }}" class="side-link {{ 'active' if request.endpoint=='sampah' }}" title="Tempat Sampah">
+        <span class="side-icon">{{ side_icon('trash') }}</span>
+        <span class="side-text sidebar-label">Tempat Sampah</span>
+      </a>
+
+      {% if current_user.is_admin %}
+      <p class="side-nav-heading sidebar-label">Admin</p>
+      <a href="{{ url_for('laporan') }}" class="side-link {{ 'active' if request.endpoint=='laporan' }}" title="Laporan & Model">
+        <span class="side-icon">{{ side_icon('report') }}</span>
+        <span class="side-text sidebar-label">Laporan &amp; Model</span>
+      </a>
+      <a href="{{ url_for('kelola_user') }}" class="side-link {{ 'active' if request.endpoint=='kelola_user' }}" title="Kelola User">
+        <span class="side-icon">{{ side_icon('users') }}</span>
+        <span class="side-text sidebar-label">Kelola User</span>
+      </a>
+      <a href="{{ url_for('log_aktivitas') }}" class="side-link {{ 'active' if request.endpoint=='log_aktivitas' }}" title="Log Aktivitas">
+        <span class="side-icon">{{ side_icon('log') }}</span>
+        <span class="side-text sidebar-label">Log Aktivitas</span>
+      </a>
+      {% endif %}
+    </nav>
+  </aside>
+
+  <div class="app-main">
+    <div class="topbar">
+      <button class="hamburger-btn" id="sidebar-toggle" aria-label="Buka/tutup sidebar" aria-expanded="true">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="user-box">
+        <div class="user-menu">
+          <div class="user-info" id="user-menu-toggle">
+            <span class="user-name">{{ current_user.nama_lengkap }} ▾</span>
+            <span class="user-role">{{ 'Admin' if current_user.is_admin else 'Analis Kredit' }}</span>
+          </div>
+          <div class="user-dropdown" id="user-dropdown">
+            <a href="{{ url_for('profil') }}">Profil Saya</a>
+            <a href="{{ url_for('logout') }}" class="danger">Keluar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main>
+{% else %}
+<main class="auth-main">
+{% endif %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-wrap">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+{% if current_user.is_authenticated %}
+    </main>
+    <footer>SISTEM PREDIKSI KELAYAKAN KREDIT FINTECH &middot; PROTOTIPE SKRIPSI &middot; MODEL: XGBOOST</footer>
+  </div>
+</div>
+{% else %}
+</main>
+{% endif %}
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

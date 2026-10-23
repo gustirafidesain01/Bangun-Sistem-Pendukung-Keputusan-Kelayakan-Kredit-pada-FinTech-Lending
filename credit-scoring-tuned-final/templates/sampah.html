@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Tempat Sampah — Sistem Prediksi Kelayakan Kredit{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <h2>Tempat Sampah</h2>
+  <p class="sub">Pengajuan yang dihapus bisa dipulihkan dalam 30 hari sebelum hilang permanen.</p>
+</div>
+
+<div class="card">
+  {% if daftar %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Nama Pemohon</th><th>Dihapus Pada</th><th>Sisa Waktu</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+      {% for p in daftar %}
+      <tr>
+        <td style="font-family:Inter;">{{ p.nama_pemohon }}</td>
+        <td>{{ p.dihapus_pada.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>
+          {% if p.sisa_hari_restore == 0 %}
+          <span class="pill risk">Akan hilang hari ini</span>
+          {% else %}
+          <span class="pill warn">{{ p.sisa_hari_restore }} hari lagi</span>
+          {% endif %}
+        </td>
+        <td style="display:flex; gap:8px;">
+          <form method="POST" action="{{ url_for('restore_pengajuan', pengajuan_id=p.id) }}" class="inline-form">
+            <button type="submit" class="btn-small">Pulihkan</button>
+          </form>
+          {% if current_user.is_admin %}
+          <form method="POST" action="{{ url_for('hapus_permanen_pengajuan', pengajuan_id=p.id) }}" class="inline-form"
+                onsubmit="return confirm('Hapus permanen? Data tidak bisa dikembalikan lagi.');">
+            <button type="submit" class="btn-small" style="color:#B23A2E; border-color:#B23A2E;">Hapus Permanen</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-state">Tempat sampah kosong.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
